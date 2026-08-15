@@ -1,100 +1,25 @@
-# vinext-starter
+# Wealth Track Navigator
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+高薪賽道 AI 職涯導航系統：以證據、職級 ontology、薪酬計算與策略規劃，協助使用者回答「下一步去哪裡、補什麼能力、如何讓人力資本複利」。
 
-## Prerequisites
+## 目前版本
 
-- Node.js `>=22.13.0`
+- 繁體中文深色 Career Intelligence dashboard。
+- Profile 貼上解析、結構化欄位與人工修正。
+- Evidence / Claim / Freshness / Confidence domain contracts。
+- Demo / Production mode 邊界與 Provider license gate。
+- WT-IC / WT-M blind leveling contract。
+- vesting-aware compensation、gap matrix、90／180／365 日 strategy API。
+- 公開示範網站：[Wealth Track Navigator](https://wealth-track-navigator.prstkteam006208.chatgpt.site/)。
 
-## Quick Start
+## 模式
 
-```bash
-npm install
-npm run dev
-npm run build
-```
+`APP_MODE=demo` 顯示明確標示的示範資料；`APP_MODE=production` 在沒有合法 Provider 時 fail closed，顯示「資料目前無法取得」。禁止用模型補造真人、薪資、樣本數或來源。
 
-This starter does not use `wrangler.jsonc`.
+## 本機
 
-## Included Shape
+需要 Node.js 22+。安裝依賴後執行 `vinext dev`；建置使用 `vinext build`，測試使用 `node --test tests/rendered-html.test.mjs`。
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
+## 已知限制
 
-## Workspace Auth Headers
-
-Signed-in visitors receive both `oai-authenticated-user-id` and `oai-authenticated-user-email`. Private Sites require every visitor to sign in; public Sites may also have anonymous visitors, for whom neither header is present.
-
-The user ID is stable for the same user on the same Site and different across Sites. Email and name are intended for display or contact purposes.
-
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
-
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const userId = requestHeaders.get("oai-authenticated-user-id");
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
-```
-
-## Optional Dispatch-Owned ChatGPT Sign-In
-
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+目前仍是第一個可用 vertical slice：正式 licensed people／compensation provider、資料庫 authentication、外部 E2E corpus、完整 CI/CD 與 production credentials 尚未配置，因此不能宣稱整份原始規格的 Production Ready。
