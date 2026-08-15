@@ -181,3 +181,13 @@ test("confidence uses provenance factors and worker responses carry operational 
   assert.equal(breakdown.crossSourceAgreement, 85);
   assert.equal(breakdown.score, 74);
 });
+
+test("market value engine returns explainable demo dimensions and fails closed in production", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/market-value"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.mode, "demo");
+  assert.equal(typeof body.marketValue.score, "number");
+  assert.ok(body.marketValue.evidence.includes("deterministic-skill-and-scope-rules"));
+});
