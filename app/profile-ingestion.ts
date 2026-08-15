@@ -1,4 +1,4 @@
-import { inflateRawSync } from "node:zlib";
+import { inflateRawSync, inflateSync } from "node:zlib";
 
 export type ProfileInputKind = "text" | "pdf" | "docx" | "url";
 export type ProfileIngestionResult = { kind: ProfileInputKind; text: string; source: "user-supplied"; warnings: string[] };
@@ -64,13 +64,29 @@ function decodePdfLiteral(value: string): string {
 export function extractPdfText(bytes: Uint8Array): string {
   const raw = decode(bytes);
   if (!raw.includes("%PDF-")) throw new Error("PDF header is missing");
+  const sources = [raw];
+  for (const dictionary of raw.matchAll(/([\s\S]*?)stream/g)) {
+    if (!dictionary[1].includes("/FlateDecode")) continue;
+    const streamStart = dictionary.index + dictionary[0].length;
+    const contentStart = raw[streamStart] === "\r" && raw[streamStart + 1] === "\n" ? streamStart + 2 : raw[streamStart] === "\n" ? streamStart + 1 : streamStart;
+    const streamEnd = raw.indexOf("endstream", contentStart);
+    if (streamEnd < 0) continue;
+    const compressed = bytes.slice(contentStart, streamEnd);
+    try {
+      sources.push(decode(new Uint8Array(inflateSync(compressed))));
+    } catch {
+      try { sources.push(decode(new Uint8Array(inflateRawSync(compressed)))); } catch { /* malformed stream is handled by the empty-text gate */ }
+    }
+  }
   const parts: string[] = [];
-  for (const block of raw.matchAll(/BT([\s\S]*?)ET/g)) {
-    const content = block[1];
-    for (const literal of content.matchAll(/\((?:\\.|[^)])*\)/g)) parts.push(decodePdfLiteral(literal[0]));
-    for (const hex of content.matchAll(/<([0-9A-Fa-f\s]+)>/g)) {
-      const clean = hex[1].replace(/\s/g, "");
-      if (clean.length % 2 === 0) parts.push(decode(Uint8Array.from({ length: clean.length / 2 }, (_, i) => Number.parseInt(clean.slice(i * 2, i * 2 + 2), 16))));
+  for (const source of sources) {
+    for (const block of source.matchAll(/BT([\s\S]*?)ET/g)) {
+      const content = block[1];
+      for (const literal of content.matchAll(/\((?:\\.|[^)])*\)/g)) parts.push(decodePdfLiteral(literal[0]));
+      for (const hex of content.matchAll(/<([0-9A-Fa-f\s]+)>/g)) {
+        const clean = hex[1].replace(/\s/g, "");
+        if (clean.length % 2 === 0) parts.push(decode(Uint8Array.from({ length: clean.length / 2 }, (_, i) => Number.parseInt(clean.slice(i * 2, i * 2 + 2), 16))));
+      }
     }
   }
   return parts.join(" ").replace(/\s+/g, " ").trim();
