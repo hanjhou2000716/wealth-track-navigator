@@ -6,5 +6,5 @@ export async function POST(request: Request) {
   const text = typeof body?.text === "string" ? body.text.trim() : "";
   if (!text) return Response.json({ error: "resume text is required" }, { status: 400 });
   if (text.length > 20000) return Response.json({ error: "resume text exceeds the 20,000 character limit" }, { status: 413 });
-  return Response.json({ mode: "demo", ...parseResumeText(text, demoProfile) });
+  return Response.json({ mode: "demo", originalText: text, ...parseResumeText(text, demoProfile) });
 }
