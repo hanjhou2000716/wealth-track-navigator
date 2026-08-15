@@ -225,3 +225,28 @@ test("compensation contract exposes vesting-aware yearly totals", async () => {
   assert.equal(body.compensation.years[3].signOn, 0);
   assert.match(body.compensation.fourYearTotalFormatted, /NTD$/);
 });
+
+test("profile ingestion contract handles text, external URL boundaries, and malformed files", async () => {
+  const app = await worker();
+  const textResponse = await app.fetch(new Request("http://localhost/api/profile/ingest", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ kind: "text", text: "Jordan Huang\nMechanical Engineer\nPython" }),
+  }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const urlResponse = await app.fetch(new Request("http://localhost/api/profile/ingest", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ kind: "url", url: "https://example.com/profile" }),
+  }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const form = new FormData();
+  form.append("file", new File(["not a real docx"], "resume.docx"));
+  const malformedResponse = await app.fetch(new Request("http://localhost/api/profile/ingest", { method: "POST", body: form }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const textBody = await textResponse.json();
+  const urlBody = await urlResponse.json();
+  assert.equal(textResponse.status, 200);
+  assert.equal(textBody.kind, "text");
+  assert.equal(urlResponse.status, 503);
+  assert.equal(urlBody.code, "UNSUPPORTED");
+  assert.equal(malformedResponse.status, 422);
+  assert.equal((await malformedResponse.json()).code, "MALFORMED");
+});
