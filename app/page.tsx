@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { demoProfile } from "./demo-data";
 
 const paths = [
@@ -12,7 +12,10 @@ const paths = [
 
 export default function Home() {
   const [active, setActive] = useState("Overview");
+  const [analysis, setAnalysis] = useState<{ score: number; leveling: { level: string; confidence: number } } | null>(null);
   const navItems = [{ key: "Overview", label: "總覽" }, { key: "Profile", label: "履歷" }, { key: "Market value", label: "市場身價" }, { key: "Next move", label: "下一步" }, { key: "Path", label: "路徑" }, { key: "Network", label: "人脈" }, { key: "Comp", label: "薪酬" }, { key: "Plan", label: "計畫" }];
+
+  useEffect(() => { fetch("/api/analysis").then((response) => response.json()).then(setAnalysis).catch(() => setAnalysis(null)); }, []);
 
   if (active !== "Overview") {
     return <ModuleView active={active} onBack={() => setActive("Overview")} />;
@@ -38,8 +41,8 @@ export default function Home() {
         <header className="topbar"><div><p className="eyebrow">2026 年 8 月 15 日・星期四 <span className="live-dot" /> 分析編號 #024</p><h1>讓你的下一步，<em>持續複利。</em></h1></div><div className="top-actions"><button className="icon-button" aria-label="通知">♢</button><button className="profile-button">JH <span>⌄</span></button></div></header>
 
         <div className="hero-grid">
-          <article className="score-card panel"><div className="card-kicker"><span>WEALTH TRACK 分數</span><button aria-label="分數說明">ⓘ</button></div><div className="score-row"><div className="score">74<span>/100</span></div><div className="score-trend">↗ 8 分 <small>較上次分析</small></div></div><div className="meter"><span /></div><div className="score-footer"><span>基礎穩健</span><span>12 天後重新檢視 →</span></div></article>
-          <article className="position-card panel"><div className="card-kicker"><span>目前定位</span><span className="evidence-label">● 有證據支持</span></div><div className="role-line"><div className="company-logo">G</div><div><h2>機械工程師</h2><p>Garmin・桃園，台灣</p></div></div><div className="level-display"><div><small>標準化職級</small><strong>WT-IC2 <span>↗</span></strong></div><div className="confidence"><div className="confidence-ring">86%</div><small>可信度</small></div></div><div className="position-meta"><span>4.2 年經驗</span><span>•</span><span>機械／硬體</span></div></article>
+          <article className="score-card panel"><div className="card-kicker"><span>WEALTH TRACK 分數</span><button aria-label="分數說明">ⓘ</button></div><div className="score-row"><div className="score">{analysis?.score ?? 74}<span>/100</span></div><div className="score-trend">↗ 8 分 <small>較上次分析</small></div></div><div className="meter"><span style={{ width: `${analysis?.score ?? 74}%` }} /></div><div className="score-footer"><span>基礎穩健</span><span>12 天後重新檢視 →</span></div></article>
+          <article className="position-card panel"><div className="card-kicker"><span>目前定位</span><span className="evidence-label">● 有證據支持</span></div><div className="role-line"><div className="company-logo">G</div><div><h2>機械工程師</h2><p>Garmin・桃園，台灣</p></div></div><div className="level-display"><div><small>標準化職級</small><strong>{analysis?.leveling.level ?? "WT-IC2"} <span>↗</span></strong></div><div className="confidence"><div className="confidence-ring">{analysis?.leveling.confidence ?? 86}%</div><small>可信度</small></div></div><div className="position-meta"><span>4.2 年經驗</span><span>•</span><span>機械／硬體</span></div></article>
         </div>
 
         <div className="section-heading"><div><p className="eyebrow">人力資本快照</p><h2>下一步可以持續複利的資產</h2></div><button className="text-button">查看完整分析 <span>→</span></button></div>
@@ -135,6 +138,9 @@ function ModuleView({ active, onBack }: { active: string; onBack: () => void }) 
 function ProfileWorkspace({ onBack }: { onBack: () => void }) {
   const [profile, setProfile] = useState(demoProfile);
   const [saved, setSaved] = useState(false);
+  const [resumeText, setResumeText] = useState("");
+  const [parsed, setParsed] = useState(false);
   const update = (key: "name" | "location" | "summary", value: string) => setProfile((current) => ({ ...current, [key]: value }));
-  return <main className="module-shell"><header className="module-top"><button className="back-button" onClick={onBack}>← 返回總覽</button><div className="module-mode"><span className="demo-dot" /> 示範資料・可編輯履歷</div></header><section className="profile-editor"><div className="profile-editor-heading"><div><p className="eyebrow">履歷 / 結構化資料</p><h1>讓市場看懂你的經驗。</h1><p>先修正結構化履歷，再計算任何分數或建議。</p></div><button className="save-button" onClick={() => setSaved(true)}>{saved ? "已儲存 ✓" : "儲存修正"}</button></div><div className="editor-grid"><label>姓名<input value={profile.name} onChange={(event) => update("name", event.target.value)} /></label><label>所在地<input value={profile.location} onChange={(event) => update("location", event.target.value)} /></label><label className="wide">個人摘要<textarea value={profile.summary} onChange={(event) => update("summary", event.target.value)} /></label></div><div className="profile-columns"><div><p className="eyebrow">工作經歷</p><article className="employment-card panel"><strong>{profile.employment[0].role}</strong><span>{profile.employment[0].company}・{profile.employment[0].startedAt}</span><p>{profile.employment[0].scope}</p><small>影響力證據：{profile.employment[0].impact}</small></article></div><div><p className="eyebrow">技能與證據</p><div className="chip-list">{profile.skills.map((skill) => <span key={skill}>{skill}</span>)}</div><div className="editor-note">ⓘ 使用者提供的欄位屬於 Tier A 證據；我們不會自行捏造缺少的數字。</div></div></div></section></main>;
+  const parseResume = () => { const lines = resumeText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean); if (!lines.length) return; const skillPool = ["Python", "CAD", "DFM", "Supplier Management", "Product Validation", "SQL", "Project Management"]; const detected = skillPool.filter((skill) => resumeText.toLowerCase().includes(skill.toLowerCase())); setProfile((current) => ({ ...current, name: lines[0].slice(0, 80), summary: lines.slice(1, 3).join(" ") || current.summary, skills: detected.length ? detected : current.skills })); setParsed(true); };
+  return <main className="module-shell"><header className="module-top"><button className="back-button" onClick={onBack}>← 返回總覽</button><div className="module-mode"><span className="demo-dot" /> 示範資料・可編輯履歷</div></header><section className="profile-editor"><div className="profile-editor-heading"><div><p className="eyebrow">履歷 / 結構化資料</p><h1>讓市場看懂你的經驗。</h1><p>先修正結構化履歷，再計算任何分數或建議。</p></div><button className="save-button" onClick={() => setSaved(true)}>{saved ? "已儲存 ✓" : "儲存修正"}</button></div><section className="paste-box panel"><div><p className="eyebrow">快速導入</p><h2>貼上履歷文字</h2><p>支援中英文混合文字；解析後仍可人工修正，系統不會自行補造經歷。</p></div><textarea value={resumeText} onChange={(event) => setResumeText(event.target.value)} placeholder="請貼上履歷文字，例如：姓名、職稱、專案與技能…" /><div className="paste-actions"><button className="parse-button" onClick={parseResume}>解析並建立結構化 Profile</button>{parsed && <span>✓ 已解析，請檢查下方欄位</span>}</div></section><div className="editor-grid"><label>姓名<input value={profile.name} onChange={(event) => update("name", event.target.value)} /></label><label>所在地<input value={profile.location} onChange={(event) => update("location", event.target.value)} /></label><label className="wide">個人摘要<textarea value={profile.summary} onChange={(event) => update("summary", event.target.value)} /></label></div><div className="profile-columns"><div><p className="eyebrow">工作經歷</p><article className="employment-card panel"><strong>{profile.employment[0].role}</strong><span>{profile.employment[0].company}・{profile.employment[0].startedAt}</span><p>{profile.employment[0].scope}</p><small>影響力證據：{profile.employment[0].impact}</small></article></div><div><p className="eyebrow">技能與證據</p><div className="chip-list">{profile.skills.map((skill) => <span key={skill}>{skill}</span>)}</div><div className="editor-note">ⓘ 使用者提供的欄位屬於 Tier A 證據；我們不會自行捏造缺少的數字。</div></div></div></section></main>;
 }
