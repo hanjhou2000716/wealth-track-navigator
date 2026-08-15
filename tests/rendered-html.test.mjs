@@ -58,7 +58,7 @@ test("returns vesting-aware compensation and prioritized strategy gaps", async (
   const body = await response.json();
   assert.equal(response.status, 200);
   assert.equal(body.horizons.length, 3);
-  assert.equal(body.horizons[0].horizon, "90 days");
+  assert.equal(body.horizons[0].horizon, "90 天");
   assert.ok(body.gaps[0].delta >= body.gaps.at(-1).delta);
   assert.equal(body.compensation.realIndex, 129);
   assert.match(body.compensation.fourYearTotal, /NTD$/);
