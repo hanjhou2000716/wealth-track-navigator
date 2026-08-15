@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { demoProfile } from "./demo-data";
 
 const paths = [
   { label: "Market Value", value: "78", tone: "cyan" },
@@ -126,5 +127,13 @@ function ModuleView({ active, onBack }: { active: string; onBack: () => void }) 
     },
   };
   const view = content[active];
+  if (active === "Profile") return <ProfileWorkspace onBack={onBack} />;
   return <main className="module-shell"><header className="module-top"><button className="back-button" onClick={onBack}>← Overview</button><div className="module-mode"><span className="demo-dot" /> DEMO DATA · EVIDENCE MODE</div></header><section className="module-hero"><p className="eyebrow">{view.kicker}</p><h1>{view.title}</h1><p>{view.intro}</p></section><section className="module-cards">{view.cards.map((card) => <article className="module-card panel" key={card.label}><div className={`metric-icon ${card.tone}`}>◎</div><small>{card.label}</small><strong>{card.value}</strong><p>{card.detail}</p></article>)}</section><section className="module-detail panel"><div><p className="eyebrow">WHY THIS RESULT?</p><h2>Evidence before inference.</h2><p>Every number on this screen is either user-provided, calculated by a deterministic rule, or explicitly marked as unavailable. Recommendations stay separate from facts.</p></div><div className="evidence-list"><span>✓ User supplied profile</span><span>✓ Normalized role ontology</span><span>○ External provider not connected</span></div></section></main>;
+}
+
+function ProfileWorkspace({ onBack }: { onBack: () => void }) {
+  const [profile, setProfile] = useState(demoProfile);
+  const [saved, setSaved] = useState(false);
+  const update = (key: "name" | "location" | "summary", value: string) => setProfile((current) => ({ ...current, [key]: value }));
+  return <main className="module-shell"><header className="module-top"><button className="back-button" onClick={onBack}>← Overview</button><div className="module-mode"><span className="demo-dot" /> DEMO DATA · EDITABLE PROFILE</div></header><section className="profile-editor"><div className="profile-editor-heading"><div><p className="eyebrow">PROFILE / STRUCTURED INPUT</p><h1>Make your experience legible.</h1><p>Correct the structured profile before any score or recommendation is calculated.</p></div><button className="save-button" onClick={() => setSaved(true)}>{saved ? "Saved ✓" : "Save corrections"}</button></div><div className="editor-grid"><label>Full name<input value={profile.name} onChange={(event) => update("name", event.target.value)} /></label><label>Location<input value={profile.location} onChange={(event) => update("location", event.target.value)} /></label><label className="wide">Summary<textarea value={profile.summary} onChange={(event) => update("summary", event.target.value)} /></label></div><div className="profile-columns"><div><p className="eyebrow">EMPLOYMENT</p><article className="employment-card panel"><strong>{profile.employment[0].role}</strong><span>{profile.employment[0].company} · {profile.employment[0].startedAt}</span><p>{profile.employment[0].scope}</p><small>Impact evidence: {profile.employment[0].impact}</small></article></div><div><p className="eyebrow">SKILLS & EVIDENCE</p><div className="chip-list">{profile.skills.map((skill) => <span key={skill}>{skill}</span>)}</div><div className="editor-note">ⓘ User-supplied fields are Tier A evidence. We never invent missing metrics.</div></div></div></section></main>;
 }
