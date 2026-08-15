@@ -117,3 +117,13 @@ test("radar and network contracts expose explicit unavailable states", async () 
   assert.equal(networkBody.profiles.length, 0);
   assert.match(networkBody.unavailable, /沒有已驗證/);
 });
+
+test("failure injection catalog covers every mandatory failure family", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/failure-injection"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.total, 12);
+  assert.ok(body.cases.some((item) => item.id === "401" && item.expected === "unavailable"));
+  assert.ok(body.cases.some((item) => item.id === "duplicate-profiles" && item.expected === "deduplicated"));
+});

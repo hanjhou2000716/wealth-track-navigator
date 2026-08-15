@@ -11,6 +11,7 @@
 - WT-IC / WT-M blind leveling contract。
 - vesting-aware compensation、gap matrix、90／180／365 日 strategy API。
 - 300 筆可重現 blind leveling evaluation harness、health contract、CI workflow 與基本 response security headers。
+- 明確的 Profile／Leveling／Evidence／Provider／Radar／Alumni／Trajectory／Compensation／Strategy／Scoring service contracts，以及 12 類 failure-injection catalog。
 - 公開示範網站：[Wealth Track Navigator](https://wealth-track-navigator.prstkteam006208.chatgpt.site/)。
 
 ## 模式
