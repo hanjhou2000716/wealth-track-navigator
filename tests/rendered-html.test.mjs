@@ -115,7 +115,7 @@ test("radar and network contracts expose explicit unavailable states", async () 
   const network = await app.fetch(new Request("http://localhost/api/network"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
   const radarBody = await radar.json();
   const networkBody = await network.json();
-  assert.equal(radarBody.items[0].evidence, "demo-profile-scope");
+  assert.ok(radarBody.items[0].evidence.includes("demo-profile-scope"));
   assert.equal(networkBody.profiles.length, 0);
   assert.match(networkBody.unavailable, /沒有已驗證/);
 });
@@ -190,4 +190,15 @@ test("market value engine returns explainable demo dimensions and fails closed i
   assert.equal(body.mode, "demo");
   assert.equal(typeof body.marketValue.score, "number");
   assert.ok(body.marketValue.evidence.includes("deterministic-skill-and-scope-rules"));
+});
+
+test("job radar returns deterministic FIT and STRETCH gaps", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/radar"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.deepEqual(body.items.map((item) => item.track), ["FIT", "STRETCH"]);
+  assert.equal(typeof body.items[0].match, "number");
+  assert.ok(Array.isArray(body.items[1].gaps));
+  assert.ok(body.items.every((item) => item.evidence.includes("deterministic-role-skill-match")));
 });

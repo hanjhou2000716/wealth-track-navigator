@@ -62,10 +62,12 @@ export default function Home() {
 function ModuleView({ active, onBack }: { active: string; onBack: () => void }) {
   const [strategy, setStrategy] = useState<{ horizons: { horizon: string; actions: string[] }[]; gaps: { dimension: string; delta: number; nextAction: string }[]; compensation: { fourYearTotal: string; realIndex: number | null; evidence: string } | null } | null>(null);
   const [marketValue, setMarketValue] = useState<{ technicalCapital: number; impactEvidence: number; transferableCapital: number; scarcitySignal: number; score: number } | null>(null);
+  const [radar, setRadar] = useState<{ track: "FIT" | "STRETCH"; match: number; gaps: string[] }[] | null>(null);
   const [providerSummary, setProviderSummary] = useState("尚未連接外部 Provider");
   useEffect(() => {
     if (active === "Plan" || active === "Comp") fetch("/api/strategy").then((response) => response.json()).then(setStrategy).catch(() => setStrategy(null));
     if (active === "Market value") fetch("/api/market-value").then((response) => response.json()).then((body) => setMarketValue(body.marketValue)).catch(() => setMarketValue(null));
+    if (active === "Next move") fetch("/api/radar").then((response) => response.json()).then((body) => setRadar(body.items ?? [])).catch(() => setRadar(null));
     fetch("/api/providers").then((response) => response.json()).then((body) => setProviderSummary(body.states?.some((state: { available: boolean }) => state.available) ? "示範 Provider 可用" : "外部 Provider 尚未驗證")).catch(() => setProviderSummary("Provider 狀態未知"));
   }, [active]);
   const content: Record<string, { kicker: string; title: string; intro: string; cards: { label: string; value: string; detail: string; tone: string }[] }> = {
@@ -146,6 +148,10 @@ function ModuleView({ active, onBack }: { active: string; onBack: () => void }) 
     { label: "技術資本", value: String(marketValue.technicalCapital), detail: "技能與證照的可驗證訊號", tone: "cyan" },
     { label: "影響力證據", value: String(marketValue.impactEvidence), detail: "scope／impact 欄位覆蓋度", tone: "amber" },
     { label: "可轉移資本", value: String(marketValue.transferableCapital), detail: "專案、語言與跨職涯訊號", tone: "lime" },
+  ] : active === "Next move" && radar ? [
+    { label: "務實適配 FIT", value: `${radar.find((item) => item.track === "FIT")?.match ?? "—"}`, detail: radar.find((item) => item.track === "FIT")?.gaps.join("、") || "主要證據已覆蓋", tone: "cyan" },
+    { label: "挑戰路徑 STRETCH", value: `${radar.find((item) => item.track === "STRETCH")?.match ?? "—"}`, detail: radar.find((item) => item.track === "STRETCH")?.gaps.join("、") || "需要更多職責證據", tone: "violet" },
+    { label: "最高槓桿差距", value: radar.find((item) => item.track === "STRETCH")?.gaps[0] || "—", detail: "先補證據，再比較職位", tone: "amber" },
   ] : active === "Plan" && strategy ? [
     { label: "90 天", value: String(strategy.horizons[0]?.actions.length ?? 0), detail: strategy.gaps[0]?.nextAction ?? "等待策略資料", tone: "cyan" },
     { label: "6 個月", value: String(strategy.horizons[1]?.actions.length ?? 0), detail: strategy.horizons[1]?.actions[0] ?? "等待策略資料", tone: "violet" },
