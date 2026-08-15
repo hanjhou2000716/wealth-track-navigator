@@ -8,10 +8,10 @@ export interface ProfileService { parse(text: string): Promise<ServiceResult<Pro
 export interface LevelingService { normalize(profile: Profile): Promise<ServiceResult<{ level: string; confidence: number }>>; }
 export interface EvidenceService { attach<T>(data: T, claims: TrustClaim[]): Promise<ServiceResult<T>>; }
 export interface ProviderService { readonly mode: ServiceMode; query<T>(purpose: string, input: unknown): Promise<ServiceResult<T>>; }
-export interface JobRadarService extends ProviderService {}
-export interface AlumniService extends ProviderService {}
-export interface TrajectoryService extends ProviderService {}
-export interface CompensationService extends ProviderService {}
+export type JobRadarService = ProviderService;
+export type AlumniService = ProviderService;
+export type TrajectoryService = ProviderService;
+export type CompensationService = ProviderService;
 export interface StrategyService { plan(profile: Profile): Promise<ServiceResult<{ horizon: string; actions: string[] }[]>>; }
 export interface ScoringService { score(profile: Profile): Promise<ServiceResult<{ score: number }>>; }
 
