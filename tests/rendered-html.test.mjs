@@ -96,3 +96,24 @@ test("strategy contract fails closed when production mode is selected", async ()
     else process.env.APP_MODE = previous;
   }
 });
+
+test("profile parser accepts pasted text without fabricating missing skills", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/profile/parse", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "Alex Chen\nMechanical engineer\nPython and CAD" }) }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.profile.name, "Alex Chen");
+  assert.deepEqual(body.detectedSkills, ["Python", "CAD"]);
+  assert.equal(body.profile.employment[0].company, "Garmin");
+});
+
+test("radar and network contracts expose explicit unavailable states", async () => {
+  const app = await worker();
+  const radar = await app.fetch(new Request("http://localhost/api/radar"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const network = await app.fetch(new Request("http://localhost/api/network"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const radarBody = await radar.json();
+  const networkBody = await network.json();
+  assert.equal(radarBody.items[0].evidence, "demo-profile-scope");
+  assert.equal(networkBody.profiles.length, 0);
+  assert.match(networkBody.unavailable, /沒有已驗證/);
+});
