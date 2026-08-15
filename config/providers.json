@@ -1,0 +1,34 @@
+{
+  "providers": {
+    "demo": {
+      "enabled": true,
+      "contract_verified": true,
+      "purposes": ["people", "compensation", "cost_of_living", "jobs"],
+      "person_display": false,
+      "bulk_storage": false,
+      "redistributable": false,
+      "retention_days": 0,
+      "pii": { "email": false, "phone": false, "address": false }
+    },
+    "licensed_people": {
+      "enabled": false,
+      "contract_verified": false,
+      "purposes": ["people"],
+      "person_display": false,
+      "bulk_storage": false,
+      "redistributable": false,
+      "retention_days": 0,
+      "pii": { "email": false, "phone": false, "address": false }
+    },
+    "licensed_compensation": {
+      "enabled": false,
+      "contract_verified": false,
+      "purposes": ["compensation", "cost_of_living"],
+      "person_display": false,
+      "bulk_storage": false,
+      "redistributable": false,
+      "retention_days": 0,
+      "pii": { "email": false, "phone": false, "address": false }
+    }
+  }
+}

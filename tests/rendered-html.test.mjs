@@ -150,3 +150,20 @@ test("six acceptance personas are explicitly reported", async () => {
   assert.equal(body.personas.at(-1).id, "F");
   assert.ok(body.personas.every((persona) => persona.status === "PASS"));
 });
+
+test("provider kill switch and canonical identity resolution are deterministic", async () => {
+  const app = await worker();
+  const previous = process.env.PROVIDER_DEMO_ENABLED;
+  process.env.PROVIDER_DEMO_ENABLED = "false";
+  try {
+    const response = await app.fetch(new Request("http://localhost/api/providers"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+    const body = await response.json();
+    assert.equal(body.states.every((state) => state.available === false), true);
+  } finally {
+    if (previous === undefined) delete process.env.PROVIDER_DEMO_ENABLED;
+    else process.env.PROVIDER_DEMO_ENABLED = previous;
+  }
+  const { canonicalizeCompany } = await import("../app/canonical.ts");
+  assert.equal(canonicalizeCompany("Garmin International").canonicalId, "company:garmin");
+  assert.equal(canonicalizeCompany("台積電").canonicalId, "company:tsmc");
+});

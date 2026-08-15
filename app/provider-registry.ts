@@ -1,4 +1,5 @@
 export type ProviderPurpose = "people" | "compensation" | "cost_of_living" | "jobs";
+import { providerKillSwitch } from "./provider-contracts";
 
 export type ProviderRegistration = {
   id: string;
@@ -17,10 +18,10 @@ export const providerRegistry: ProviderRegistration[] = [
 ];
 
 export function canQueryProduction(provider: ProviderRegistration, purpose: ProviderPurpose): boolean {
-  return provider.enabled && provider.contractVerified && provider.purposes.includes(purpose) && !provider.pii.email && !provider.pii.phone && !provider.pii.address;
+  return providerKillSwitch(provider.id) && provider.enabled && provider.contractVerified && provider.purposes.includes(purpose) && !provider.pii.email && !provider.pii.phone && !provider.pii.address;
 }
 
 export function providerState(mode: "demo" | "production", purpose: ProviderPurpose) {
-  const available = providerRegistry.filter((provider) => provider.purposes.includes(purpose) && (mode === "demo" ? provider.id === "demo" : provider.id !== "demo" && canQueryProduction(provider, purpose)));
+  const available = providerRegistry.filter((provider) => provider.purposes.includes(purpose) && providerKillSwitch(provider.id) && (mode === "demo" ? provider.id === "demo" : provider.id !== "demo" && canQueryProduction(provider, purpose)));
   return { mode, purpose, available: available.length > 0, providers: available.map(({ id, label }) => ({ id, label })) };
 }
