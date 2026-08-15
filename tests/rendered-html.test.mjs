@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { deflateSync } from "node:zlib";
 
 async function worker() {
   const entry = await import(new URL(`../dist/server/index.js?test=${Date.now()}`, import.meta.url));
@@ -251,4 +252,18 @@ test("profile ingestion contract handles text, external URL boundaries, and malf
   assert.equal(urlBody.code, "UNSUPPORTED");
   assert.equal(malformedResponse.status, 422);
   assert.equal((await malformedResponse.json()).code, "MALFORMED");
+});
+
+test("profile ingestion extracts text from a Flate-compressed PDF stream", async () => {
+  const app = await worker();
+  const payload = deflateSync(Buffer.from("BT (Jordan Huang) Tj ET", "latin1"));
+  const prefix = Buffer.from(`%PDF-1.4\n1 0 obj\n<< /Filter /FlateDecode /Length ${payload.length} >>\nstream\n`, "latin1");
+  const suffix = Buffer.from("\nendstream\nendobj\n%%EOF", "latin1");
+  const form = new FormData();
+  form.append("file", new File([Buffer.concat([prefix, payload, suffix])], "resume.pdf", { type: "application/pdf" }));
+  const response = await app.fetch(new Request("http://localhost/api/profile/ingest", { method: "POST", body: form }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.kind, "pdf");
+  assert.equal(body.profile.name, "Jordan Huang");
 });
