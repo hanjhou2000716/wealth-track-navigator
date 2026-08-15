@@ -212,3 +212,14 @@ test("trajectory engine exposes small demo seed data without claiming 500 people
   assert.equal(body.transitions[0].quality, "DEMO_INSUFFICIENT");
   assert.match(body.evidence, /insufficient/);
 });
+
+test("compensation contract exposes vesting-aware yearly totals", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/compensation"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.compensation.years.length, 4);
+  assert.equal(body.compensation.years[0].signOn, 150000);
+  assert.equal(body.compensation.years[3].signOn, 0);
+  assert.match(body.compensation.fourYearTotalFormatted, /NTD$/);
+});

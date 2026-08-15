@@ -64,9 +64,11 @@ function ModuleView({ active, onBack }: { active: string; onBack: () => void }) 
   const [marketValue, setMarketValue] = useState<{ technicalCapital: number; impactEvidence: number; transferableCapital: number; scarcitySignal: number; score: number } | null>(null);
   const [radar, setRadar] = useState<{ track: "FIT" | "STRETCH"; match: number; gaps: string[] }[] | null>(null);
   const [trajectory, setTrajectory] = useState<{ transitions: { to: string; springboardScore: number; sampleSize: number; quality: string }[]; sampleSize: number } | null>(null);
+  const [compensation, setCompensation] = useState<{ years: { year: number; equity: number; bonus: number; signOn: number }[]; fourYearTotalFormatted: string; realIndex: number | null; evidence: string } | null>(null);
   const [providerSummary, setProviderSummary] = useState("尚未連接外部 Provider");
   useEffect(() => {
-    if (active === "Plan" || active === "Comp") fetch("/api/strategy").then((response) => response.json()).then(setStrategy).catch(() => setStrategy(null));
+    if (active === "Plan") fetch("/api/strategy").then((response) => response.json()).then(setStrategy).catch(() => setStrategy(null));
+    if (active === "Comp") fetch("/api/compensation").then((response) => response.json()).then((body) => setCompensation(body.compensation)).catch(() => setCompensation(null));
     if (active === "Market value") fetch("/api/market-value").then((response) => response.json()).then((body) => setMarketValue(body.marketValue)).catch(() => setMarketValue(null));
     if (active === "Next move") fetch("/api/radar").then((response) => response.json()).then((body) => setRadar(body.items ?? [])).catch(() => setRadar(null));
     if (active === "Path") fetch("/api/trajectory").then((response) => response.json()).then(setTrajectory).catch(() => setTrajectory(null));
@@ -162,10 +164,10 @@ function ModuleView({ active, onBack }: { active: string; onBack: () => void }) 
     { label: "90 天", value: String(strategy.horizons[0]?.actions.length ?? 0), detail: strategy.gaps[0]?.nextAction ?? "等待策略資料", tone: "cyan" },
     { label: "6 個月", value: String(strategy.horizons[1]?.actions.length ?? 0), detail: strategy.horizons[1]?.actions[0] ?? "等待策略資料", tone: "violet" },
     { label: "12 個月", value: String(strategy.horizons[2]?.actions.length ?? 0), detail: strategy.horizons[2]?.actions[0] ?? "等待策略資料", tone: "lime" },
-  ] : active === "Comp" && strategy?.compensation ? [
-    { label: "四年名目總額", value: strategy.compensation.fourYearTotal, detail: strategy.compensation.evidence, tone: "violet" },
-    { label: "實質指數", value: String(strategy.compensation.realIndex ?? "—"), detail: strategy.compensation.evidence, tone: "lime" },
-    { label: "最高槓桿差距", value: strategy.gaps[0]?.dimension ?? "—", detail: strategy.gaps[0]?.nextAction ?? "等待策略資料", tone: "amber" },
+  ] : active === "Comp" && compensation ? [
+    { label: "四年名目總額", value: compensation.fourYearTotalFormatted, detail: compensation.evidence, tone: "violet" },
+    { label: "實質指數", value: String(compensation.realIndex ?? "—"), detail: compensation.evidence, tone: "lime" },
+    { label: "第四年 equity", value: compensation.years[3] ? String(Math.round(compensation.years[3].equity)) : "—", detail: "依 vesting schedule 計算", tone: "amber" },
   ] : view.cards;
   return <main className="module-shell"><header className="module-top"><button className="back-button" onClick={onBack}>← 返回總覽</button><div className="module-mode"><span className="demo-dot" /> 示範資料・證據模式</div></header><section className="module-hero"><p className="eyebrow">{view.kicker}</p><h1>{view.title}</h1><p>{view.intro}</p></section><section className="module-cards">{cards.map((card) => <article className="module-card panel" key={card.label}><div className={`metric-icon ${card.tone}`}>◎</div><small>{card.label}</small><strong>{card.value}</strong><p>{card.detail}</p></article>)}</section><section className="module-detail panel"><div><p className="eyebrow">為什麼是這個結果？</p><h2>先看證據，再做推論。</h2><p>這個畫面上的數字不是使用者看不懂的黑箱：它們來自使用者資料、可重現的規則，或明確標示為目前不可取得。建議與事實保持分離。</p></div><div className="evidence-list"><span>✓ 使用者提供的履歷</span><span>✓ 標準化職級 ontology</span><span>○ {providerSummary}</span></div></section></main>;
 }
