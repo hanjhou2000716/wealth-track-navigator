@@ -12,8 +12,8 @@ test("renders the standalone Wealth Track Navigator product shell", async () => 
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /Wealth Track Navigator/i);
-  assert.match(html, /Your next move/i);
-  assert.match(html, /WEALTH TRACK SCORE/i);
+  assert.match(html, /讓你的下一步/);
+  assert.match(html, /WEALTH TRACK 分數/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site|codex-preview/i);
 });
 
@@ -47,4 +47,16 @@ test("returns blind leveling evidence and title arbitrage", async () => {
   assert.equal(body.titleArbitrage, 1);
   assert.equal(body.blind.level, "WT-IC3");
   assert.ok(body.blind.evidenceUsed.includes("Decision rights"));
+});
+
+test("returns vesting-aware compensation and prioritized strategy gaps", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/strategy"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.horizons.length, 3);
+  assert.equal(body.horizons[0].horizon, "90 days");
+  assert.ok(body.gaps[0].delta >= body.gaps.at(-1).delta);
+  assert.equal(body.compensation.realIndex, 129);
+  assert.match(body.compensation.fourYearTotal, /NTD$/);
 });

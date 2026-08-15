@@ -4,14 +4,15 @@ import { useState } from "react";
 import { demoProfile } from "./demo-data";
 
 const paths = [
-  { label: "Market Value", value: "78", tone: "cyan" },
-  { label: "Level Readiness", value: "64", tone: "violet" },
-  { label: "Mobility", value: "72", tone: "lime" },
-  { label: "Comp Upside", value: "+41%", tone: "amber" },
+  { label: "市場身價", value: "78", tone: "cyan" },
+  { label: "職級準備度", value: "64", tone: "violet" },
+  { label: "轉職機動性", value: "72", tone: "lime" },
+  { label: "薪酬上行空間", value: "+41%", tone: "amber" },
 ];
 
 export default function Home() {
   const [active, setActive] = useState("Overview");
+  const navItems = [{ key: "Overview", label: "總覽" }, { key: "Profile", label: "履歷" }, { key: "Market value", label: "市場身價" }, { key: "Next move", label: "下一步" }, { key: "Path", label: "路徑" }, { key: "Network", label: "人脈" }, { key: "Comp", label: "薪酬" }, { key: "Plan", label: "計畫" }];
 
   if (active !== "Overview") {
     return <ModuleView active={active} onBack={() => setActive("Overview")} />;
@@ -21,33 +22,33 @@ export default function Home() {
     <main className="shell">
       <aside className="sidebar">
         <div className="brand"><span className="brand-mark">W</span><span>WEALTH<br /><b>TRACK</b></span></div>
-        <div className="workspace"><span className="avatar">JH</span><span><small>Workspace</small><strong>Jordan Huang</strong></span><span className="chevron">⌄</span></div>
-        <nav aria-label="Primary navigation">
-          {['Overview', 'Profile', 'Market value', 'Next move', 'Path', 'Network', 'Comp', 'Plan'].map((item, i) => (
-            <button key={item} className={`nav-item ${active === item ? 'active' : ''}`} onClick={() => setActive(item)}>
-              <span className="nav-icon">{['⌂', '◎', '↗', '⊹', '⌁', '♧', '＄', '◷'][i]}</span>{item}
+        <div className="workspace"><span className="avatar">JH</span><span><small>工作區</small><strong>Jordan Huang</strong></span><span className="chevron">⌄</span></div>
+        <nav aria-label="主要導覽">
+          {navItems.map((item, i) => (
+            <button key={item.key} className={`nav-item ${active === item.key ? 'active' : ''}`} onClick={() => setActive(item.key)}>
+              <span className="nav-icon">{['⌂', '◎', '↗', '⊹', '⌁', '♧', '＄', '◷'][i]}</span>{item.label}
               {i === 3 && <span className="nav-dot" />}
             </button>
           ))}
         </nav>
-        <div className="sidebar-bottom"><div className="demo-pill"><span /> DEMO DATA</div><button className="settings">⚙ Settings</button></div>
+        <div className="sidebar-bottom"><div className="demo-pill"><span /> 示範資料</div><button className="settings">⚙ 設定</button></div>
       </aside>
 
       <section className="content">
-        <header className="topbar"><div><p className="eyebrow">THURSDAY, 15 AUG 2026 <span className="live-dot" /> ANALYSIS RUN #024</p><h1>Your next move, <em>compounded.</em></h1></div><div className="top-actions"><button className="icon-button" aria-label="Notifications">♢</button><button className="profile-button">JH <span>⌄</span></button></div></header>
+        <header className="topbar"><div><p className="eyebrow">2026 年 8 月 15 日・星期四 <span className="live-dot" /> 分析編號 #024</p><h1>讓你的下一步，<em>持續複利。</em></h1></div><div className="top-actions"><button className="icon-button" aria-label="通知">♢</button><button className="profile-button">JH <span>⌄</span></button></div></header>
 
         <div className="hero-grid">
-          <article className="score-card panel"><div className="card-kicker"><span>WEALTH TRACK SCORE</span><button aria-label="Score information">ⓘ</button></div><div className="score-row"><div className="score">74<span>/100</span></div><div className="score-trend">↗ 8 pts <small>since last analysis</small></div></div><div className="meter"><span /></div><div className="score-footer"><span>Strong foundation</span><span>Next review in 12 days →</span></div></article>
-          <article className="position-card panel"><div className="card-kicker"><span>CURRENT POSITION</span><span className="evidence-label">● Evidence-backed</span></div><div className="role-line"><div className="company-logo">G</div><div><h2>Mechanical Engineer</h2><p>Garmin · Taoyuan, Taiwan</p></div></div><div className="level-display"><div><small>NORMALIZED LEVEL</small><strong>WT-IC2 <span>↗</span></strong></div><div className="confidence"><div className="confidence-ring">86%</div><small>confidence</small></div></div><div className="position-meta"><span>4.2 years experience</span><span>•</span><span>Mechanical / Hardware</span></div></article>
+          <article className="score-card panel"><div className="card-kicker"><span>WEALTH TRACK 分數</span><button aria-label="分數說明">ⓘ</button></div><div className="score-row"><div className="score">74<span>/100</span></div><div className="score-trend">↗ 8 分 <small>較上次分析</small></div></div><div className="meter"><span /></div><div className="score-footer"><span>基礎穩健</span><span>12 天後重新檢視 →</span></div></article>
+          <article className="position-card panel"><div className="card-kicker"><span>目前定位</span><span className="evidence-label">● 有證據支持</span></div><div className="role-line"><div className="company-logo">G</div><div><h2>機械工程師</h2><p>Garmin・桃園，台灣</p></div></div><div className="level-display"><div><small>標準化職級</small><strong>WT-IC2 <span>↗</span></strong></div><div className="confidence"><div className="confidence-ring">86%</div><small>可信度</small></div></div><div className="position-meta"><span>4.2 年經驗</span><span>•</span><span>機械／硬體</span></div></article>
         </div>
 
-        <div className="section-heading"><div><p className="eyebrow">CAPITAL SNAPSHOT</p><h2>The assets you can compound next</h2></div><button className="text-button">View full analysis <span>→</span></button></div>
-        <div className="metric-grid">{paths.map((item) => <article className="metric panel" key={item.label}><div className={`metric-icon ${item.tone}`}>{item.label === 'Comp Upside' ? '$' : item.label === 'Mobility' ? '↗' : item.label === 'Market Value' ? '◒' : '◇'}</div><p>{item.label}</p><strong>{item.value}</strong><div className="mini-bars"><i /><i /><i /><i /><i /><i /></div><small>{item.label === 'Comp Upside' ? 'vs. current package' : 'out of 100'} <span>↗</span></small></article>)}</div>
+        <div className="section-heading"><div><p className="eyebrow">人力資本快照</p><h2>下一步可以持續複利的資產</h2></div><button className="text-button">查看完整分析 <span>→</span></button></div>
+        <div className="metric-grid">{paths.map((item) => <article className="metric panel" key={item.label}><div className={`metric-icon ${item.tone}`}>{item.label === '薪酬上行空間' ? '$' : item.label === '轉職機動性' ? '↗' : item.label === '市場身價' ? '◒' : '◇'}</div><p>{item.label}</p><strong>{item.value}</strong><div className="mini-bars"><i /><i /><i /><i /><i /><i /></div><small>{item.label === '薪酬上行空間' ? '相較目前方案' : '滿分 100'} <span>↗</span></small></article>)}</div>
 
-        <div className="section-heading path-heading"><div><p className="eyebrow">RECOMMENDED PATH</p><h2>One move can unlock the next three</h2></div><span className="source-note">◎ Based on 12 evidence points</span></div>
-        <article className="path-card panel"><div className="path-step current"><span className="step-dot">1</span><div><small>NOW · 0—90 DAYS</small><h3>Upgrade your scope signal</h3><p>Turn your supplier coordination into explicit subsystem ownership.</p></div><span className="step-tag">IN PROGRESS</span></div><div className="path-line" /><div className="path-step"><span className="step-dot">2</span><div><small>NEXT · 6—18 MONTHS</small><h3>Senior Product Design</h3><p>Target Apple-adjacent product design roles where your hardware depth travels.</p></div><span className="step-tag muted">TARGET ROLE</span></div><div className="path-line" /><div className="path-step"><span className="step-dot">3</span><div><small>SPRINGBOARD · 18—36 MONTHS</small><h3>Staff-level ownership</h3><p>Build the business impact evidence that moves you toward WT-IC4.</p></div><span className="step-arrow">→</span></div><button className="path-cta">Open strategy planner <span>↗</span></button></article>
+        <div className="section-heading path-heading"><div><p className="eyebrow">建議路徑</p><h2>一次升級，解鎖接下來三步</h2></div><span className="source-note">◎ 根據 12 個證據點</span></div>
+        <article className="path-card panel"><div className="path-step current"><span className="step-dot">1</span><div><small>現在・0—90 天</small><h3>升級你的職責範圍訊號</h3><p>把供應商協作轉化為明確的子系統所有權。</p></div><span className="step-tag">進行中</span></div><div className="path-line" /><div className="path-step"><span className="step-dot">2</span><div><small>下一步・6—18 個月</small><h3>資深產品設計職位</h3><p>鎖定能讓硬體深度延伸的 Apple 周邊產品設計職位。</p></div><span className="step-tag muted">目標職位</span></div><div className="path-line" /><div className="path-step"><span className="step-dot">3</span><div><small>跳板・18—36 個月</small><h3>Staff 級所有權</h3><p>建立商業影響證據，朝 WT-IC4 前進。</p></div><span className="step-arrow">→</span></div><button className="path-cta">開啟策略規劃器 <span>↗</span></button></article>
 
-        <footer className="page-footer"><span>Wealth Track Navigator</span><span>Facts are sourced. Recommendations are labeled. <a href="#evidence">Why this result?</a></span></footer>
+        <footer className="page-footer"><span>Wealth Track Navigator</span><span>事實有來源，建議有標示。<a href="#evidence">為什麼是這個結果？</a></span></footer>
       </section>
     </main>
   );
@@ -56,84 +57,84 @@ export default function Home() {
 function ModuleView({ active, onBack }: { active: string; onBack: () => void }) {
   const content: Record<string, { kicker: string; title: string; intro: string; cards: { label: string; value: string; detail: string; tone: string }[] }> = {
     Profile: {
-      kicker: "PROFILE / STRUCTURED INPUT",
-      title: "Make your experience legible to the market.",
-      intro: "A structured profile preserves what you actually did, then makes the signal easier to evaluate.",
+      kicker: "履歷 / 結構化資料",
+      title: "讓市場看懂你的經驗。",
+      intro: "結構化履歷保留你真正做過的事，再讓重要訊號更容易被評估。",
       cards: [
-        { label: "Profile completeness", value: "82%", detail: "3 evidence fields need clarification", tone: "cyan" },
-        { label: "Scope signals", value: "14", detail: "6 have quantified impact", tone: "violet" },
-        { label: "Transferable capital", value: "68", detail: "Supplier + cross-functional depth", tone: "lime" },
+        { label: "履歷完整度", value: "82%", detail: "3 個證據欄位需要補充", tone: "cyan" },
+        { label: "職責範圍訊號", value: "14", detail: "其中 6 個有量化影響", tone: "violet" },
+        { label: "可轉移資本", value: "68", detail: "供應商協作＋跨部門深度", tone: "lime" },
       ],
     },
     "Market value": {
-      kicker: "MARKET VALUE / SIGNAL MAP",
-      title: "Your strongest signal is not your title.",
-      intro: "We separate technical depth, scope, impact and scarcity so the score is explainable—not a black box.",
+      kicker: "市場身價 / 訊號地圖",
+      title: "你最強的訊號，不是職稱。",
+      intro: "我們拆開技術深度、範圍、影響力與稀缺性，讓分數可解釋，而不是黑箱。",
       cards: [
-        { label: "Technical capital", value: "81", detail: "Mechanism + product validation", tone: "cyan" },
-        { label: "Impact evidence", value: "57", detail: "Add cost / yield ownership", tone: "amber" },
-        { label: "Scarcity premium", value: "+18%", detail: "Hardware / supplier bridge", tone: "lime" },
+        { label: "技術資本", value: "81", detail: "機構設計＋產品驗證", tone: "cyan" },
+        { label: "影響力證據", value: "57", detail: "補上成本／良率責任", tone: "amber" },
+        { label: "稀缺性溢價", value: "+18%", detail: "硬體與供應商的橋接能力", tone: "lime" },
       ],
     },
     "Next move": {
-      kicker: "NEXT MOVE / DUAL-TRACK RADAR",
-      title: "Two tracks. One deliberate upgrade.",
-      intro: "Compare a realistic fit with a stretch role, then see the gap that actually changes your trajectory.",
+      kicker: "下一步 / 雙軌雷達",
+      title: "兩條路徑，一次有意識的升級。",
+      intro: "比較務實適配與挑戰職位，再找出真正能改變職涯軌跡的差距。",
       cards: [
-        { label: "Current-fit roles", value: "12", detail: "Strong evidence match", tone: "cyan" },
-        { label: "Next-level roles", value: "5", detail: "Leadership gap is the limiter", tone: "violet" },
-        { label: "Highest-leverage gap", value: "Scope", detail: "Own a subsystem end-to-end", tone: "amber" },
+        { label: "目前適配職位", value: "12", detail: "證據匹配度高", tone: "cyan" },
+        { label: "下一級職位", value: "5", detail: "領導力差距是主要限制", tone: "violet" },
+        { label: "最高槓桿差距", value: "範圍", detail: "端到端負責一個子系統", tone: "amber" },
       ],
     },
     Path: {
-      kicker: "PATH / SPRINGBOARD TRAJECTORY",
-      title: "Work backward from the destination.",
-      intro: "Trajectory signals are shown with sample counts and confidence, never as a made-up 500-person certainty.",
+      kicker: "路徑 / 跳板軌跡",
+      title: "從目的地倒推你的路。",
+      intro: "軌跡訊號會顯示樣本數與可信度，不會假裝一定取得 500 人資料。",
       cards: [
-        { label: "Target sample", value: "500", detail: "Profiles requested", tone: "violet" },
-        { label: "Usable histories", value: "—", detail: "Provider unavailable in demo", tone: "amber" },
-        { label: "Evidence state", value: "DEMO", detail: "No external people data used", tone: "cyan" },
+        { label: "目標樣本", value: "500", detail: "要求分析的 Profile 數", tone: "violet" },
+        { label: "可用履歷歷史", value: "—", detail: "示範模式未連接 Provider", tone: "amber" },
+        { label: "證據狀態", value: "示範", detail: "未使用外部真人資料", tone: "cyan" },
       ],
     },
     Network: {
-      kicker: "NETWORK / EVIDENCE-GATED REFERRALS",
-      title: "A warm introduction starts with a real signal.",
-      intro: "No invented alumni, no scraped profiles. Demo mode keeps the empty state honest until a licensed provider is connected.",
+      kicker: "人脈 / 證據閘門內推",
+      title: "一個有效引薦，始於真實訊號。",
+      intro: "不虛構校友、不抓取 Profile。連接合法 Provider 前，示範模式會誠實顯示空狀態。",
       cards: [
-        { label: "Verified profiles", value: "0", detail: "No reliable provider evidence", tone: "cyan" },
-        { label: "Relationship status", value: "Unverified", detail: "Verify before outreach", tone: "amber" },
-        { label: "Next action", value: "Add source", detail: "Connect an authorized provider", tone: "violet" },
+        { label: "已驗證 Profile", value: "0", detail: "沒有可靠 Provider 證據", tone: "cyan" },
+        { label: "關係狀態", value: "未驗證", detail: "聯絡前先確認關係", tone: "amber" },
+        { label: "下一步", value: "加入來源", detail: "連接已授權 Provider", tone: "violet" },
       ],
     },
     Comp: {
-      kicker: "COMP / REGIONAL ARBITRAGE",
-      title: "Compare the package you can actually keep.",
-      intro: "Vesting, sign-on and purchasing power are separated so nominal salary never tells the whole story.",
+      kicker: "薪酬 / 跨區套利",
+      title: "比較你真正能留下的總包。",
+      intro: "拆開 vesting、sign-on 與購買力，因為名目薪資從來不是完整故事。",
       cards: [
-        { label: "Current package", value: "NT$1.08M", detail: "Demo input · Taiwan", tone: "cyan" },
-        { label: "4-year nominal", value: "NT$4.52M", detail: "Base + bonus + vesting", tone: "violet" },
-        { label: "Real index", value: "100", detail: "Provider evidence required", tone: "lime" },
+        { label: "目前方案", value: "NT$1.08M", detail: "示範輸入・台灣", tone: "cyan" },
+        { label: "四年名目總額", value: "NT$4.52M", detail: "底薪＋獎金＋vesting", tone: "violet" },
+        { label: "實質指數", value: "100", detail: "需要 Provider 證據", tone: "lime" },
       ],
     },
     Plan: {
-      kicker: "PLAN / CAREER STRATEGY",
-      title: "Turn one insight into a calendar.",
-      intro: "A strategy is useful only when the next 90 days are clear and the evidence you need is explicit.",
+      kicker: "計畫 / 職涯策略",
+      title: "把一個洞察變成行事曆。",
+      intro: "策略只有在未來 90 天清楚、且需要的證據明確時，才真正有用。",
       cards: [
-        { label: "90 days", value: "3", detail: "Scope-building actions", tone: "cyan" },
-        { label: "6 months", value: "2", detail: "Portfolio proof points", tone: "violet" },
-        { label: "12 months", value: "1", detail: "Role transition checkpoint", tone: "lime" },
+        { label: "90 天", value: "3", detail: "建立職責範圍的行動", tone: "cyan" },
+        { label: "6 個月", value: "2", detail: "作品集證明點", tone: "violet" },
+        { label: "12 個月", value: "1", detail: "職位轉換檢查點", tone: "lime" },
       ],
     },
   };
   const view = content[active];
   if (active === "Profile") return <ProfileWorkspace onBack={onBack} />;
-  return <main className="module-shell"><header className="module-top"><button className="back-button" onClick={onBack}>← Overview</button><div className="module-mode"><span className="demo-dot" /> DEMO DATA · EVIDENCE MODE</div></header><section className="module-hero"><p className="eyebrow">{view.kicker}</p><h1>{view.title}</h1><p>{view.intro}</p></section><section className="module-cards">{view.cards.map((card) => <article className="module-card panel" key={card.label}><div className={`metric-icon ${card.tone}`}>◎</div><small>{card.label}</small><strong>{card.value}</strong><p>{card.detail}</p></article>)}</section><section className="module-detail panel"><div><p className="eyebrow">WHY THIS RESULT?</p><h2>Evidence before inference.</h2><p>Every number on this screen is either user-provided, calculated by a deterministic rule, or explicitly marked as unavailable. Recommendations stay separate from facts.</p></div><div className="evidence-list"><span>✓ User supplied profile</span><span>✓ Normalized role ontology</span><span>○ External provider not connected</span></div></section></main>;
+  return <main className="module-shell"><header className="module-top"><button className="back-button" onClick={onBack}>← 返回總覽</button><div className="module-mode"><span className="demo-dot" /> 示範資料・證據模式</div></header><section className="module-hero"><p className="eyebrow">{view.kicker}</p><h1>{view.title}</h1><p>{view.intro}</p></section><section className="module-cards">{view.cards.map((card) => <article className="module-card panel" key={card.label}><div className={`metric-icon ${card.tone}`}>◎</div><small>{card.label}</small><strong>{card.value}</strong><p>{card.detail}</p></article>)}</section><section className="module-detail panel"><div><p className="eyebrow">為什麼是這個結果？</p><h2>先看證據，再做推論。</h2><p>這個畫面上的數字不是使用者看不懂的黑箱：它們來自使用者資料、可重現的規則，或明確標示為目前不可取得。建議與事實保持分離。</p></div><div className="evidence-list"><span>✓ 使用者提供的履歷</span><span>✓ 標準化職級 ontology</span><span>○ 尚未連接外部 Provider</span></div></section></main>;
 }
 
 function ProfileWorkspace({ onBack }: { onBack: () => void }) {
   const [profile, setProfile] = useState(demoProfile);
   const [saved, setSaved] = useState(false);
   const update = (key: "name" | "location" | "summary", value: string) => setProfile((current) => ({ ...current, [key]: value }));
-  return <main className="module-shell"><header className="module-top"><button className="back-button" onClick={onBack}>← Overview</button><div className="module-mode"><span className="demo-dot" /> DEMO DATA · EDITABLE PROFILE</div></header><section className="profile-editor"><div className="profile-editor-heading"><div><p className="eyebrow">PROFILE / STRUCTURED INPUT</p><h1>Make your experience legible.</h1><p>Correct the structured profile before any score or recommendation is calculated.</p></div><button className="save-button" onClick={() => setSaved(true)}>{saved ? "Saved ✓" : "Save corrections"}</button></div><div className="editor-grid"><label>Full name<input value={profile.name} onChange={(event) => update("name", event.target.value)} /></label><label>Location<input value={profile.location} onChange={(event) => update("location", event.target.value)} /></label><label className="wide">Summary<textarea value={profile.summary} onChange={(event) => update("summary", event.target.value)} /></label></div><div className="profile-columns"><div><p className="eyebrow">EMPLOYMENT</p><article className="employment-card panel"><strong>{profile.employment[0].role}</strong><span>{profile.employment[0].company} · {profile.employment[0].startedAt}</span><p>{profile.employment[0].scope}</p><small>Impact evidence: {profile.employment[0].impact}</small></article></div><div><p className="eyebrow">SKILLS & EVIDENCE</p><div className="chip-list">{profile.skills.map((skill) => <span key={skill}>{skill}</span>)}</div><div className="editor-note">ⓘ User-supplied fields are Tier A evidence. We never invent missing metrics.</div></div></div></section></main>;
+  return <main className="module-shell"><header className="module-top"><button className="back-button" onClick={onBack}>← 返回總覽</button><div className="module-mode"><span className="demo-dot" /> 示範資料・可編輯履歷</div></header><section className="profile-editor"><div className="profile-editor-heading"><div><p className="eyebrow">履歷 / 結構化資料</p><h1>讓市場看懂你的經驗。</h1><p>先修正結構化履歷，再計算任何分數或建議。</p></div><button className="save-button" onClick={() => setSaved(true)}>{saved ? "已儲存 ✓" : "儲存修正"}</button></div><div className="editor-grid"><label>姓名<input value={profile.name} onChange={(event) => update("name", event.target.value)} /></label><label>所在地<input value={profile.location} onChange={(event) => update("location", event.target.value)} /></label><label className="wide">個人摘要<textarea value={profile.summary} onChange={(event) => update("summary", event.target.value)} /></label></div><div className="profile-columns"><div><p className="eyebrow">工作經歷</p><article className="employment-card panel"><strong>{profile.employment[0].role}</strong><span>{profile.employment[0].company}・{profile.employment[0].startedAt}</span><p>{profile.employment[0].scope}</p><small>影響力證據：{profile.employment[0].impact}</small></article></div><div><p className="eyebrow">技能與證據</p><div className="chip-list">{profile.skills.map((skill) => <span key={skill}>{skill}</span>)}</div><div className="editor-note">ⓘ 使用者提供的欄位屬於 Tier A 證據；我們不會自行捏造缺少的數字。</div></div></div></section></main>;
 }
