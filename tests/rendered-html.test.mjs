@@ -127,3 +127,26 @@ test("failure injection catalog covers every mandatory failure family", async ()
   assert.ok(body.cases.some((item) => item.id === "401" && item.expected === "unavailable"));
   assert.ok(body.cases.some((item) => item.id === "duplicate-profiles" && item.expected === "deduplicated"));
 });
+
+test("session and storage boundaries never expose raw identity or pretend persistence", async () => {
+  const app = await worker();
+  const session = await app.fetch(new Request("http://localhost/api/session", { headers: { "oai-authenticated-user-id": "user-secret-value" } }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const storage = await app.fetch(new Request("http://localhost/api/storage"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const sessionBody = await session.json();
+  const storageBody = await storage.json();
+  assert.equal(sessionBody.authenticated, true);
+  assert.equal(sessionBody.subjectHash, "3d030d238d564028221c8e33");
+  assert.doesNotMatch(JSON.stringify(sessionBody), /user-secret-value/);
+  assert.equal(storage.status, 503);
+  assert.equal(storageBody.durableStorage, false);
+});
+
+test("six acceptance personas are explicitly reported", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/acceptance"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.total, 6);
+  assert.equal(body.personas.at(-1).id, "F");
+  assert.ok(body.personas.every((persona) => persona.status === "PASS"));
+});
