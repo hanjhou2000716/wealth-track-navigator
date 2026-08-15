@@ -202,3 +202,13 @@ test("job radar returns deterministic FIT and STRETCH gaps", async () => {
   assert.ok(Array.isArray(body.items[1].gaps));
   assert.ok(body.items.every((item) => item.evidence.includes("deterministic-role-skill-match")));
 });
+
+test("trajectory engine exposes small demo seed data without claiming 500 people", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/trajectory"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.sampleSize, 3);
+  assert.equal(body.transitions[0].quality, "DEMO_INSUFFICIENT");
+  assert.match(body.evidence, /insufficient/);
+});

@@ -63,11 +63,13 @@ function ModuleView({ active, onBack }: { active: string; onBack: () => void }) 
   const [strategy, setStrategy] = useState<{ horizons: { horizon: string; actions: string[] }[]; gaps: { dimension: string; delta: number; nextAction: string }[]; compensation: { fourYearTotal: string; realIndex: number | null; evidence: string } | null } | null>(null);
   const [marketValue, setMarketValue] = useState<{ technicalCapital: number; impactEvidence: number; transferableCapital: number; scarcitySignal: number; score: number } | null>(null);
   const [radar, setRadar] = useState<{ track: "FIT" | "STRETCH"; match: number; gaps: string[] }[] | null>(null);
+  const [trajectory, setTrajectory] = useState<{ transitions: { to: string; springboardScore: number; sampleSize: number; quality: string }[]; sampleSize: number } | null>(null);
   const [providerSummary, setProviderSummary] = useState("尚未連接外部 Provider");
   useEffect(() => {
     if (active === "Plan" || active === "Comp") fetch("/api/strategy").then((response) => response.json()).then(setStrategy).catch(() => setStrategy(null));
     if (active === "Market value") fetch("/api/market-value").then((response) => response.json()).then((body) => setMarketValue(body.marketValue)).catch(() => setMarketValue(null));
     if (active === "Next move") fetch("/api/radar").then((response) => response.json()).then((body) => setRadar(body.items ?? [])).catch(() => setRadar(null));
+    if (active === "Path") fetch("/api/trajectory").then((response) => response.json()).then(setTrajectory).catch(() => setTrajectory(null));
     fetch("/api/providers").then((response) => response.json()).then((body) => setProviderSummary(body.states?.some((state: { available: boolean }) => state.available) ? "示範 Provider 可用" : "外部 Provider 尚未驗證")).catch(() => setProviderSummary("Provider 狀態未知"));
   }, [active]);
   const content: Record<string, { kicker: string; title: string; intro: string; cards: { label: string; value: string; detail: string; tone: string }[] }> = {
@@ -148,6 +150,10 @@ function ModuleView({ active, onBack }: { active: string; onBack: () => void }) 
     { label: "技術資本", value: String(marketValue.technicalCapital), detail: "技能與證照的可驗證訊號", tone: "cyan" },
     { label: "影響力證據", value: String(marketValue.impactEvidence), detail: "scope／impact 欄位覆蓋度", tone: "amber" },
     { label: "可轉移資本", value: String(marketValue.transferableCapital), detail: "專案、語言與跨職涯訊號", tone: "lime" },
+  ] : active === "Path" && trajectory ? [
+    { label: "可用轉職樣本", value: String(trajectory.sampleSize), detail: "示範 seed；不足以做市場推論", tone: "violet" },
+    { label: "最佳跳板分數", value: String(trajectory.transitions[0]?.springboardScore ?? "—"), detail: trajectory.transitions[0]?.to ?? "尚無可用跳板", tone: "cyan" },
+    { label: "資料品質", value: trajectory.transitions[0]?.quality ?? "UNKNOWN", detail: "需要合法 career-history Provider 才能升級", tone: "amber" },
   ] : active === "Next move" && radar ? [
     { label: "務實適配 FIT", value: `${radar.find((item) => item.track === "FIT")?.match ?? "—"}`, detail: radar.find((item) => item.track === "FIT")?.gaps.join("、") || "主要證據已覆蓋", tone: "cyan" },
     { label: "挑戰路徑 STRETCH", value: `${radar.find((item) => item.track === "STRETCH")?.match ?? "—"}`, detail: radar.find((item) => item.track === "STRETCH")?.gaps.join("、") || "需要更多職責證據", tone: "violet" },
