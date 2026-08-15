@@ -27,6 +27,8 @@ test("exposes an analysis contract with evidence and deterministic score fields"
   assert.equal(body.leveling.level, "WT-IC2");
   assert.ok(body.claims.every((claim) => ["FACT", "INFERENCE", "RECOMMENDATION", "UNKNOWN"].includes(claim.kind)));
   assert.ok(body.claims.every((claim) => Array.isArray(claim.evidence)));
+  assert.equal(body.trust.breakdown.evidenceCoverage, 88);
+  assert.equal(body.trust.sourceTier, "TIER_A_PRIMARY");
 });
 
 test("fails closed for production providers without verified licensing", async () => {

@@ -12,7 +12,7 @@ const paths = [
 
 export default function Home() {
   const [active, setActive] = useState("Overview");
-  const [analysis, setAnalysis] = useState<{ score: number; leveling: { level: string; confidence: number } } | null>(null);
+  const [analysis, setAnalysis] = useState<{ score: number; leveling: { level: string; confidence: number }; trust?: { breakdown: { sourceReliability: number; freshness: number; evidenceCoverage: number; crossSourceAgreement: number; score: number }; source: string; sourceTier: string; freshness: string } | null } | null>(null);
   const navItems = [{ key: "Overview", label: "總覽" }, { key: "Profile", label: "履歷" }, { key: "Market value", label: "市場身價" }, { key: "Next move", label: "下一步" }, { key: "Path", label: "路徑" }, { key: "Network", label: "人脈" }, { key: "Comp", label: "薪酬" }, { key: "Plan", label: "計畫" }];
 
   useEffect(() => { fetch("/api/analysis").then((response) => response.json()).then(setAnalysis).catch(() => setAnalysis(null)); }, []);
@@ -50,6 +50,8 @@ export default function Home() {
 
         <div className="section-heading path-heading"><div><p className="eyebrow">建議路徑</p><h2>一次升級，解鎖接下來三步</h2></div><span className="source-note">◎ 根據 12 個證據點</span></div>
         <article className="path-card panel"><div className="path-step current"><span className="step-dot">1</span><div><small>現在・0—90 天</small><h3>升級你的職責範圍訊號</h3><p>把供應商協作轉化為明確的子系統所有權。</p></div><span className="step-tag">進行中</span></div><div className="path-line" /><div className="path-step"><span className="step-dot">2</span><div><small>下一步・6—18 個月</small><h3>資深產品設計職位</h3><p>鎖定能讓硬體深度延伸的 Apple 周邊產品設計職位。</p></div><span className="step-tag muted">目標職位</span></div><div className="path-line" /><div className="path-step"><span className="step-dot">3</span><div><small>跳板・18—36 個月</small><h3>Staff 級所有權</h3><p>建立商業影響證據，朝 WT-IC4 前進。</p></div><span className="step-arrow">→</span></div><button className="path-cta">開啟策略規劃器 <span>↗</span></button></article>
+
+        <section className="trust-panel panel" id="evidence"><div><p className="eyebrow">WHY THIS RESULT? / 證據信任</p><h2>先看來源，再相信分數。</h2><p>信任分數由來源可靠度、資料新鮮度、證據覆蓋與跨來源一致性計算；不是模型自行填寫的信心百分比。</p><div className="trust-source">來源：{analysis?.trust?.source ?? "user-demo-profile"}・{analysis?.trust?.sourceTier ?? "TIER_A_PRIMARY"}・{analysis?.trust?.freshness ?? "FRESH"}</div></div><div className="trust-factors">{[["來源可靠度", analysis?.trust?.breakdown.sourceReliability ?? 100], ["Freshness", analysis?.trust?.breakdown.freshness ?? 100], ["證據覆蓋", analysis?.trust?.breakdown.evidenceCoverage ?? 88], ["跨來源一致性", analysis?.trust?.breakdown.crossSourceAgreement ?? 85]].map(([label, value]) => <div className="trust-factor" key={label as string}><span>{label}</span><strong>{value}%</strong><i><b style={{ width: `${value}%` }} /></i></div>)}</div></section>
 
         <footer className="page-footer"><span>Wealth Track Navigator</span><span>事實有來源，建議有標示。<a href="#evidence">為什麼是這個結果？</a></span></footer>
       </section>
