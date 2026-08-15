@@ -151,6 +151,8 @@ test("six acceptance personas are explicitly reported", async () => {
   assert.equal(body.total, 6);
   assert.equal(body.personas.at(-1).id, "F");
   assert.ok(body.personas.every((persona) => persona.status === "PASS"));
+  assert.ok(body.personas.every((persona) => Array.isArray(persona.evidence) && persona.evidence.length > 0));
+  assert.match(body.overall, /DEMO_BOUNDARY/);
 });
 
 test("provider kill switch and canonical identity resolution are deterministic", async () => {
