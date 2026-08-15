@@ -60,3 +60,39 @@ test("returns vesting-aware compensation and prioritized strategy gaps", async (
   assert.equal(body.compensation.realIndex, 129);
   assert.match(body.compensation.fourYearTotal, /NTD$/);
 });
+
+test("exposes a reproducible 300-case leveling evaluation contract", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/evaluation"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.evaluation.totalCases, 300);
+  assert.equal(body.evaluation.methodology, "blind-scope-evidence-v1");
+  assert.ok(body.evaluation.withinOneRate >= 90);
+});
+
+test("health contract reports the current safety boundary", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/health"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.status, "ok");
+  assert.equal(body.providerStatus, "demo-only");
+});
+
+test("strategy contract fails closed when production mode is selected", async () => {
+  const app = await worker();
+  const previous = process.env.APP_MODE;
+  process.env.APP_MODE = "production";
+  try {
+    const response = await app.fetch(new Request("http://localhost/api/strategy"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+    const body = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(body.mode, "production");
+    assert.equal(body.compensation, null);
+    assert.equal(body.horizons.length, 0);
+  } finally {
+    if (previous === undefined) delete process.env.APP_MODE;
+    else process.env.APP_MODE = previous;
+  }
+});

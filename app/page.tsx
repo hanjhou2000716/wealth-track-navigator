@@ -58,6 +58,12 @@ export default function Home() {
 }
 
 function ModuleView({ active, onBack }: { active: string; onBack: () => void }) {
+  const [strategy, setStrategy] = useState<{ horizons: { horizon: string; actions: string[] }[]; gaps: { dimension: string; delta: number; nextAction: string }[]; compensation: { fourYearTotal: string; realIndex: number | null; evidence: string } | null } | null>(null);
+  const [providerSummary, setProviderSummary] = useState("尚未連接外部 Provider");
+  useEffect(() => {
+    if (active === "Plan" || active === "Comp") fetch("/api/strategy").then((response) => response.json()).then(setStrategy).catch(() => setStrategy(null));
+    fetch("/api/providers").then((response) => response.json()).then((body) => setProviderSummary(body.states?.some((state: { available: boolean }) => state.available) ? "示範 Provider 可用" : "外部 Provider 尚未驗證")).catch(() => setProviderSummary("Provider 狀態未知"));
+  }, [active]);
   const content: Record<string, { kicker: string; title: string; intro: string; cards: { label: string; value: string; detail: string; tone: string }[] }> = {
     Profile: {
       kicker: "履歷 / 結構化資料",
@@ -132,7 +138,16 @@ function ModuleView({ active, onBack }: { active: string; onBack: () => void }) 
   };
   const view = content[active];
   if (active === "Profile") return <ProfileWorkspace onBack={onBack} />;
-  return <main className="module-shell"><header className="module-top"><button className="back-button" onClick={onBack}>← 返回總覽</button><div className="module-mode"><span className="demo-dot" /> 示範資料・證據模式</div></header><section className="module-hero"><p className="eyebrow">{view.kicker}</p><h1>{view.title}</h1><p>{view.intro}</p></section><section className="module-cards">{view.cards.map((card) => <article className="module-card panel" key={card.label}><div className={`metric-icon ${card.tone}`}>◎</div><small>{card.label}</small><strong>{card.value}</strong><p>{card.detail}</p></article>)}</section><section className="module-detail panel"><div><p className="eyebrow">為什麼是這個結果？</p><h2>先看證據，再做推論。</h2><p>這個畫面上的數字不是使用者看不懂的黑箱：它們來自使用者資料、可重現的規則，或明確標示為目前不可取得。建議與事實保持分離。</p></div><div className="evidence-list"><span>✓ 使用者提供的履歷</span><span>✓ 標準化職級 ontology</span><span>○ 尚未連接外部 Provider</span></div></section></main>;
+  const cards = active === "Plan" && strategy ? [
+    { label: "90 天", value: String(strategy.horizons[0]?.actions.length ?? 0), detail: strategy.gaps[0]?.nextAction ?? "等待策略資料", tone: "cyan" },
+    { label: "6 個月", value: String(strategy.horizons[1]?.actions.length ?? 0), detail: strategy.horizons[1]?.actions[0] ?? "等待策略資料", tone: "violet" },
+    { label: "12 個月", value: String(strategy.horizons[2]?.actions.length ?? 0), detail: strategy.horizons[2]?.actions[0] ?? "等待策略資料", tone: "lime" },
+  ] : active === "Comp" && strategy?.compensation ? [
+    { label: "四年名目總額", value: strategy.compensation.fourYearTotal, detail: strategy.compensation.evidence, tone: "violet" },
+    { label: "實質指數", value: String(strategy.compensation.realIndex ?? "—"), detail: strategy.compensation.evidence, tone: "lime" },
+    { label: "最高槓桿差距", value: strategy.gaps[0]?.dimension ?? "—", detail: strategy.gaps[0]?.nextAction ?? "等待策略資料", tone: "amber" },
+  ] : view.cards;
+  return <main className="module-shell"><header className="module-top"><button className="back-button" onClick={onBack}>← 返回總覽</button><div className="module-mode"><span className="demo-dot" /> 示範資料・證據模式</div></header><section className="module-hero"><p className="eyebrow">{view.kicker}</p><h1>{view.title}</h1><p>{view.intro}</p></section><section className="module-cards">{cards.map((card) => <article className="module-card panel" key={card.label}><div className={`metric-icon ${card.tone}`}>◎</div><small>{card.label}</small><strong>{card.value}</strong><p>{card.detail}</p></article>)}</section><section className="module-detail panel"><div><p className="eyebrow">為什麼是這個結果？</p><h2>先看證據，再做推論。</h2><p>這個畫面上的數字不是使用者看不懂的黑箱：它們來自使用者資料、可重現的規則，或明確標示為目前不可取得。建議與事實保持分離。</p></div><div className="evidence-list"><span>✓ 使用者提供的履歷</span><span>✓ 標準化職級 ontology</span><span>○ {providerSummary}</span></div></section></main>;
 }
 
 function ProfileWorkspace({ onBack }: { onBack: () => void }) {

@@ -10,6 +10,7 @@
 - Demo / Production mode 邊界與 Provider license gate。
 - WT-IC / WT-M blind leveling contract。
 - vesting-aware compensation、gap matrix、90／180／365 日 strategy API。
+- 300 筆可重現 blind leveling evaluation harness、health contract、CI workflow 與基本 response security headers。
 - 公開示範網站：[Wealth Track Navigator](https://wealth-track-navigator.prstkteam006208.chatgpt.site/)。
 
 ## 模式
@@ -22,4 +23,4 @@
 
 ## 已知限制
 
-目前仍是第一個可用 vertical slice：正式 licensed people／compensation provider、資料庫 authentication、外部 E2E corpus、完整 CI/CD 與 production credentials 尚未配置，因此不能宣稱整份原始規格的 Production Ready。
+目前仍是第一個可用 vertical slice：正式 licensed people／compensation provider、資料庫 authentication、外部 E2E corpus、CI 的遠端執行結果與 production credentials 尚未配置，因此不能宣稱整份原始規格的 Production Ready。公開版本的正確狀態是「Demo／fail-closed，供使用者驗收產品流程」。
