@@ -11,7 +11,7 @@
     "start": "vinext start",
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint app db worker types tests --ignore-pattern dist --ignore-pattern .next --ignore-pattern .wrangler --ignore-pattern drizzle",
+    "lint": "eslint app db worker types tests scripts --ignore-pattern dist --ignore-pattern .next --ignore-pattern .wrangler --ignore-pattern drizzle",
     "security:scan": "node scripts/security-scan.mjs",
     "db:generate": "drizzle-kit generate"
   },

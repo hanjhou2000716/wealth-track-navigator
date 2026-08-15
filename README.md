@@ -13,6 +13,7 @@
 - PDF／DOCX／TXT／貼上文字的 typed profile ingestion；外部 Profile URL 在沒有授權 Provider 時明確 fail closed。
 - 300 筆可重現 blind leveling evaluation harness、health contract、CI workflow 與基本 response security headers。
 - 明確的 Profile／Leveling／Evidence／Provider／Radar／Alumni／Trajectory／Compensation／Strategy／Scoring service contracts，以及 12 類 failure-injection catalog。
+- 架構、資料流、AI pipeline、資料來源／PII／保留政策、Provider contract、評估與部署指南均位於 `docs/`。
 - 公開示範網站：[Wealth Track Navigator](https://wealth-track-navigator.prstkteam006208.chatgpt.site/)。
 
 ## 模式
@@ -25,4 +26,4 @@
 
 ## 已知限制
 
-目前仍是第一個可用 vertical slice：正式 licensed people／compensation provider、資料庫 authentication、外部 E2E corpus、CI 的遠端執行結果與 production credentials 尚未配置，因此不能宣稱整份原始規格的 Production Ready。公開版本的正確狀態是「Demo／fail-closed，供使用者驗收產品流程」。履歷修正目前只保存於瀏覽器本機，直到 D1 與身份驗證完成前不接受真正個資作為正式資料庫紀錄。
+目前仍是第一個可用 vertical slice：正式 licensed people／compensation provider、資料庫 authentication、外部 E2E corpus、CI 的遠端執行結果與 production credentials 尚未配置，因此不能宣稱整份原始規格的 Production Ready。公開版本的正確狀態是「Demo／fail-closed，供使用者驗收產品流程」。履歷修正目前只保存於瀏覽器本機，直到 D1 與身份驗證完成前不接受真正個資作為正式資料庫紀錄。完整限制與部署門檻見 `docs/deployment/deployment-guide.md`。
