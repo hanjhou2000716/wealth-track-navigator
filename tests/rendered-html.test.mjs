@@ -28,3 +28,23 @@ test("exposes an analysis contract with evidence and deterministic score fields"
   assert.ok(body.claims.every((claim) => ["FACT", "INFERENCE", "RECOMMENDATION", "UNKNOWN"].includes(claim.kind)));
   assert.ok(body.claims.every((claim) => Array.isArray(claim.evidence)));
 });
+
+test("fails closed for production providers without verified licensing", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/providers?mode=production"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.mode, "production");
+  assert.ok(body.states.every((state) => state.available === false));
+});
+
+test("returns blind leveling evidence and title arbitrage", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/leveling"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.methodology, "blind-scope-evidence-v1");
+  assert.equal(body.titleArbitrage, 1);
+  assert.equal(body.blind.level, "WT-IC3");
+  assert.ok(body.blind.evidenceUsed.includes("Decision rights"));
+});
