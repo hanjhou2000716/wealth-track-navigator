@@ -223,6 +223,8 @@ test("compensation contract exposes vesting-aware yearly totals", async () => {
   assert.equal(body.compensation.years.length, 4);
   assert.equal(body.compensation.years[0].signOn, 150000);
   assert.equal(body.compensation.years[3].signOn, 0);
+  assert.deepEqual(body.compensation.regions.map((item) => item.region), ["TW", "US", "SG", "JP"]);
+  assert.ok(body.compensation.regions.find((item) => item.region === "US").colAdjustedTotalFormatted);
   assert.match(body.compensation.fourYearTotalFormatted, /NTD$/);
 });
 
