@@ -100,6 +100,24 @@ test("strategy contract fails closed when production mode is selected", async ()
   }
 });
 
+test("analysis contract fails closed without production providers", async () => {
+  const app = await worker();
+  const previous = process.env.APP_MODE;
+  process.env.APP_MODE = "production";
+  try {
+    const response = await app.fetch(new Request("http://localhost/api/analysis"), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+    const body = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(body.mode, "production");
+    assert.equal(body.profile, null);
+    assert.equal(body.score, null);
+    assert.equal(body.unavailable, "資料目前無法取得");
+  } finally {
+    if (previous === undefined) delete process.env.APP_MODE;
+    else process.env.APP_MODE = previous;
+  }
+});
+
 test("profile parser accepts pasted text without fabricating missing skills", async () => {
   const app = await worker();
   const response = await app.fetch(new Request("http://localhost/api/profile/parse", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "Alex Chen\nMechanical engineer\nPython and CAD" }) }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
