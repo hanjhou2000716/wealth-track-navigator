@@ -5,6 +5,7 @@ export type FreshnessStatus = "FRESH" | "AGING" | "STALE" | "UNKNOWN";
 export type Evidence = {
   sourceProvider: string;
   sourceType: string;
+  sourceRecordId?: string;
   sourceReference?: string;
   retrievedAt: string;
   observedAt?: string;
@@ -58,8 +59,10 @@ export function freshnessFromAge(ageDays: number, freshDays = 30, agingDays = 90
   return "STALE";
 }
 
-export function calculateConfidence(evidence: Evidence[]): number {
-  if (evidence.length === 0) return 0;
+export type ConfidenceBreakdown = { sourceReliability: number; freshness: number; evidenceCoverage: number; crossSourceAgreement: number; score: number };
+
+export function calculateConfidenceBreakdown(evidence: Evidence[]): ConfidenceBreakdown {
+  if (evidence.length === 0) return { sourceReliability: 0, freshness: 0, evidenceCoverage: 0, crossSourceAgreement: 0, score: 0 };
   const tierWeight: Record<SourceTier, number> = {
     TIER_A_PRIMARY: 1,
     TIER_B_LICENSED: 0.92,
@@ -67,8 +70,17 @@ export function calculateConfidence(evidence: Evidence[]): number {
     TIER_D_INFERENCE: 0.35,
   };
   const freshnessWeight: Record<FreshnessStatus, number> = { FRESH: 1, AGING: 0.82, STALE: 0.55, UNKNOWN: 0.35 };
-  const score = evidence.reduce((sum, item) => sum + tierWeight[item.sourceTier] * freshnessWeight[item.freshness] * Math.max(0, Math.min(1, item.confidence)), 0) / evidence.length;
-  return Math.round(score * 100);
+  const sourceReliability = evidence.reduce((sum, item) => sum + tierWeight[item.sourceTier] * Math.max(0, Math.min(1, item.confidence)), 0) / evidence.length;
+  const freshness = evidence.reduce((sum, item) => sum + freshnessWeight[item.freshness], 0) / evidence.length;
+  const evidenceCoverage = Math.min(1, 0.75 + evidence.length * 0.125);
+  const uniqueProviders = new Set(evidence.map((item) => item.sourceProvider)).size;
+  const crossSourceAgreement = uniqueProviders > 1 ? 1 : 0.85;
+  const score = sourceReliability * freshness * evidenceCoverage * crossSourceAgreement;
+  return { sourceReliability: Math.round(sourceReliability * 100), freshness: Math.round(freshness * 100), evidenceCoverage: Math.round(evidenceCoverage * 100), crossSourceAgreement: Math.round(crossSourceAgreement * 100), score: Math.round(score * 100) };
+}
+
+export function calculateConfidence(evidence: Evidence[]): number {
+  return calculateConfidenceBreakdown(evidence).score;
 }
 
 export function gateClaim(claim: Omit<TrustClaim, "confidence">): TrustClaim {

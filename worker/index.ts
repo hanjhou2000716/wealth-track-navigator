@@ -1,6 +1,7 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import { requestContext, withOperationalHeaders } from "../app/observability";
 
 interface Env {
   ASSETS: Fetcher;
@@ -28,24 +29,29 @@ interface ExecutionContext {
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+    const context = requestContext(request);
 
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
-      return handleImageOptimization(request, {
+      const response = await handleImageOptimization(request, {
         fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, request.url))),
         transformImage: async (body, { width, format, quality }) => {
           const result = await env.IMAGES.input(body).transform(width > 0 ? { width } : {}).output({ format, quality });
           return result.response();
         },
       }, allowedWidths);
+      return withOperationalHeaders(response, context);
     }
 
     const response = await handler.fetch(request, env, ctx);
     const headers = new Headers(response.headers);
+    headers.set("x-request-id", context.requestId);
+    headers.set("x-analysis-run-id", context.analysisRunId);
     headers.set("x-content-type-options", "nosniff");
     headers.set("referrer-policy", "strict-origin-when-cross-origin");
     headers.set("x-frame-options", "DENY");
     headers.set("permissions-policy", "camera=(), microphone=(), geolocation=()");
+    headers.set("cache-control", headers.get("cache-control") ?? "no-store");
     return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   },
 };

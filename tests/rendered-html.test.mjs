@@ -167,3 +167,15 @@ test("provider kill switch and canonical identity resolution are deterministic",
   assert.equal(canonicalizeCompany("Garmin International").canonicalId, "company:garmin");
   assert.equal(canonicalizeCompany("台積電").canonicalId, "company:tsmc");
 });
+
+test("confidence uses provenance factors and worker responses carry operational IDs", async () => {
+  const app = await worker();
+  const response = await app.fetch(new Request("http://localhost/api/health", { headers: { "x-request-id": "test-request", "x-analysis-run-id": "test-run" } }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  assert.equal(response.headers.get("x-request-id"), "test-request");
+  assert.equal(response.headers.get("x-analysis-run-id"), "test-run");
+  const { calculateConfidenceBreakdown, DEMO_EVIDENCE } = await import("../app/domain.ts");
+  const breakdown = calculateConfidenceBreakdown([DEMO_EVIDENCE]);
+  assert.equal(breakdown.evidenceCoverage, 88);
+  assert.equal(breakdown.crossSourceAgreement, 85);
+  assert.equal(breakdown.score, 74);
+});
