@@ -12,6 +12,10 @@ const paths = [
 export default function Home() {
   const [active, setActive] = useState("Overview");
 
+  if (active !== "Overview") {
+    return <ModuleView active={active} onBack={() => setActive("Overview")} />;
+  }
+
   return (
     <main className="shell">
       <aside className="sidebar">
@@ -46,4 +50,81 @@ export default function Home() {
       </section>
     </main>
   );
+}
+
+function ModuleView({ active, onBack }: { active: string; onBack: () => void }) {
+  const content: Record<string, { kicker: string; title: string; intro: string; cards: { label: string; value: string; detail: string; tone: string }[] }> = {
+    Profile: {
+      kicker: "PROFILE / STRUCTURED INPUT",
+      title: "Make your experience legible to the market.",
+      intro: "A structured profile preserves what you actually did, then makes the signal easier to evaluate.",
+      cards: [
+        { label: "Profile completeness", value: "82%", detail: "3 evidence fields need clarification", tone: "cyan" },
+        { label: "Scope signals", value: "14", detail: "6 have quantified impact", tone: "violet" },
+        { label: "Transferable capital", value: "68", detail: "Supplier + cross-functional depth", tone: "lime" },
+      ],
+    },
+    "Market value": {
+      kicker: "MARKET VALUE / SIGNAL MAP",
+      title: "Your strongest signal is not your title.",
+      intro: "We separate technical depth, scope, impact and scarcity so the score is explainable—not a black box.",
+      cards: [
+        { label: "Technical capital", value: "81", detail: "Mechanism + product validation", tone: "cyan" },
+        { label: "Impact evidence", value: "57", detail: "Add cost / yield ownership", tone: "amber" },
+        { label: "Scarcity premium", value: "+18%", detail: "Hardware / supplier bridge", tone: "lime" },
+      ],
+    },
+    "Next move": {
+      kicker: "NEXT MOVE / DUAL-TRACK RADAR",
+      title: "Two tracks. One deliberate upgrade.",
+      intro: "Compare a realistic fit with a stretch role, then see the gap that actually changes your trajectory.",
+      cards: [
+        { label: "Current-fit roles", value: "12", detail: "Strong evidence match", tone: "cyan" },
+        { label: "Next-level roles", value: "5", detail: "Leadership gap is the limiter", tone: "violet" },
+        { label: "Highest-leverage gap", value: "Scope", detail: "Own a subsystem end-to-end", tone: "amber" },
+      ],
+    },
+    Path: {
+      kicker: "PATH / SPRINGBOARD TRAJECTORY",
+      title: "Work backward from the destination.",
+      intro: "Trajectory signals are shown with sample counts and confidence, never as a made-up 500-person certainty.",
+      cards: [
+        { label: "Target sample", value: "500", detail: "Profiles requested", tone: "violet" },
+        { label: "Usable histories", value: "—", detail: "Provider unavailable in demo", tone: "amber" },
+        { label: "Evidence state", value: "DEMO", detail: "No external people data used", tone: "cyan" },
+      ],
+    },
+    Network: {
+      kicker: "NETWORK / EVIDENCE-GATED REFERRALS",
+      title: "A warm introduction starts with a real signal.",
+      intro: "No invented alumni, no scraped profiles. Demo mode keeps the empty state honest until a licensed provider is connected.",
+      cards: [
+        { label: "Verified profiles", value: "0", detail: "No reliable provider evidence", tone: "cyan" },
+        { label: "Relationship status", value: "Unverified", detail: "Verify before outreach", tone: "amber" },
+        { label: "Next action", value: "Add source", detail: "Connect an authorized provider", tone: "violet" },
+      ],
+    },
+    Comp: {
+      kicker: "COMP / REGIONAL ARBITRAGE",
+      title: "Compare the package you can actually keep.",
+      intro: "Vesting, sign-on and purchasing power are separated so nominal salary never tells the whole story.",
+      cards: [
+        { label: "Current package", value: "NT$1.08M", detail: "Demo input · Taiwan", tone: "cyan" },
+        { label: "4-year nominal", value: "NT$4.52M", detail: "Base + bonus + vesting", tone: "violet" },
+        { label: "Real index", value: "100", detail: "Provider evidence required", tone: "lime" },
+      ],
+    },
+    Plan: {
+      kicker: "PLAN / CAREER STRATEGY",
+      title: "Turn one insight into a calendar.",
+      intro: "A strategy is useful only when the next 90 days are clear and the evidence you need is explicit.",
+      cards: [
+        { label: "90 days", value: "3", detail: "Scope-building actions", tone: "cyan" },
+        { label: "6 months", value: "2", detail: "Portfolio proof points", tone: "violet" },
+        { label: "12 months", value: "1", detail: "Role transition checkpoint", tone: "lime" },
+      ],
+    },
+  };
+  const view = content[active];
+  return <main className="module-shell"><header className="module-top"><button className="back-button" onClick={onBack}>← Overview</button><div className="module-mode"><span className="demo-dot" /> DEMO DATA · EVIDENCE MODE</div></header><section className="module-hero"><p className="eyebrow">{view.kicker}</p><h1>{view.title}</h1><p>{view.intro}</p></section><section className="module-cards">{view.cards.map((card) => <article className="module-card panel" key={card.label}><div className={`metric-icon ${card.tone}`}>◎</div><small>{card.label}</small><strong>{card.value}</strong><p>{card.detail}</p></article>)}</section><section className="module-detail panel"><div><p className="eyebrow">WHY THIS RESULT?</p><h2>Evidence before inference.</h2><p>Every number on this screen is either user-provided, calculated by a deterministic rule, or explicitly marked as unavailable. Recommendations stay separate from facts.</p></div><div className="evidence-list"><span>✓ User supplied profile</span><span>✓ Normalized role ontology</span><span>○ External provider not connected</span></div></section></main>;
 }
