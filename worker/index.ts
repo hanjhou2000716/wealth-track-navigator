@@ -2,6 +2,7 @@
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 import { requestContext, withOperationalHeaders } from "../app/observability";
+import { handleWorkerMcp } from "../mcp/worker";
 
 interface Env {
   ASSETS: Fetcher;
@@ -30,6 +31,11 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const context = requestContext(request);
+
+    if (url.pathname === "/mcp") {
+      if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: { "access-control-allow-origin": "*", "access-control-allow-methods": "GET, POST, DELETE, OPTIONS", "access-control-allow-headers": "Content-Type, mcp-session-id, mcp-protocol-version, Last-Event-ID" } });
+      return withOperationalHeaders(await handleWorkerMcp(request), context);
+    }
 
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
