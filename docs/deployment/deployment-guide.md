@@ -9,7 +9,9 @@
 5. `npm run security:scan`
 6. 由 Sites 儲存與部署含有 `.openai/hosting.json` 的 build archive。
 
-目前公開網址是 [Wealth Track Navigator](https://wealth-track-navigator.prstkteam006208.chatgpt.site/)，版本 v28，狀態為 Demo／fail-closed。
+目前公開網址是 [Wealth Track Navigator](https://wealth-track-navigator.prstkteam006208.chatgpt.site/)，狀態為 Demo／fail-closed。
+
+GitHub 的 `wealth-track-navigator-deploy` workflow 會在 `main` push 時驗證並封裝 demo artifact；以 `workflow_dispatch` 選擇 `production` 時，會要求 provider license、D1、Auth 與 server-side LLM secrets，缺少任一項便失敗，不會偽造 production deployment。Sites 仍負責目前已配置的前端 hosting，部署紀錄必須保存 commit SHA、version ID、deployment ID 與 smoke test。
 
 ## Production gate
 

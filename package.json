@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint app db worker types tests scripts --ignore-pattern dist --ignore-pattern .next --ignore-pattern .wrangler --ignore-pattern drizzle",
     "security:scan": "node scripts/security-scan.mjs",
+    "readiness:demo": "node scripts/production-readiness.mjs",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
