@@ -1,6 +1,6 @@
 # Wealth Track Navigator MCP
 
-This repository now includes a read-only MCP server that exposes the existing Wealth Track Navigator contracts to ChatGPT, Codex, and other MCP-compatible clients. The Cloudflare Worker adapter also serves `/mcp` from the same HTTPS deployment when the Sites worker is redeployed.
+This repository now includes a read-only MCP server that exposes the existing Wealth Track Navigator contracts to ChatGPT, Codex, and other MCP-compatible clients. The App Router route and Cloudflare Worker adapter both serve `/mcp` from the same HTTPS deployment.
 
 ## Archetype
 
@@ -33,7 +33,7 @@ For ChatGPT Developer Mode, expose the endpoint through a public HTTPS tunnel, t
 
 ## Hosting
 
-The Node server can run on a separate stable HTTPS runtime. The Cloudflare Worker adapter (`mcp/worker.ts`) is the preferred same-origin deployment path for the existing Sites worker; it uses stateless Streamable HTTP and does not require an OpenAI API key for demo tools. Keep provider credentials and any future auth secrets in the host secret manager. The `/mcp` URL is not claimed as public until the updated worker is deployed and smoke-tested.
+The Node server can run on a separate stable HTTPS runtime. The App Router route (`app/mcp/route.ts`) and Cloudflare Worker adapter (`mcp/worker.ts`) provide the same-origin deployment path; both use stateless Streamable HTTP and do not require an OpenAI API key for demo tools. Keep provider credentials and any future auth secrets in the host secret manager. The `/mcp` URL is only claimed as public after deployment smoke tests pass.
 
 ## Safety boundary
 
