@@ -1,0 +1,51 @@
+name: wealth-track-navigator-deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment readiness mode
+        required: true
+        default: demo
+        type: choice
+        options: [demo, production]
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    env:
+      READINESS_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'demo' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - run: node --test tests/rendered-html.test.mjs
+      - run: npm run security:scan
+      - name: Enforce deployment readiness gate
+        env:
+          PRODUCTION_PROVIDER_LICENSE_VERIFIED: ${{ secrets.PRODUCTION_PROVIDER_LICENSE_VERIFIED }}
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: node scripts/production-readiness.mjs
+      - name: Upload verified build inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: wealth-track-navigator-${{ github.sha }}-${{ env.READINESS_MODE }}
+          if-no-files-found: error
+          path: |
+            package.json
+            package-lock.json
+            public
+            .openai/hosting.json
+
