@@ -33,7 +33,7 @@ For ChatGPT Developer Mode, expose the endpoint through a public HTTPS tunnel, t
 
 ## Hosting
 
-The Node server can run on a separate stable HTTPS runtime. The App Router route (`app/mcp/route.ts`) and Cloudflare Worker adapter (`mcp/worker.ts`) provide the same-origin deployment path; both use stateless Streamable HTTP and do not require an OpenAI API key for demo tools. Keep provider credentials and any future auth secrets in the host secret manager. The `/mcp` URL is only claimed as public after deployment smoke tests pass.
+The Node server can run on a separate stable HTTPS runtime. The App Router routes (`app/mcp/route.ts` and `app/api/mcp/route.ts`) plus the Cloudflare Worker adapter (`mcp/worker.ts`) provide the same-origin deployment path; Sites uses `/api/mcp` as its public MCP URL, while direct Worker runtimes may use `/mcp`. Both use stateless Streamable HTTP and do not require an OpenAI API key for demo tools. Keep provider credentials and any future auth secrets in the host secret manager. The public MCP URL is only claimed after deployment smoke tests pass.
 
 ## Safety boundary
 
